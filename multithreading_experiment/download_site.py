@@ -1,4 +1,5 @@
 import os
+import shutil
 import uuid
 
 website_download_url = 'http://www.readlet.io/'
@@ -13,5 +14,6 @@ def url_get():
     download(website_download_url, savefile)
 
 
-def clear_directory():
-    pass
+def prepare_directory():
+    shutil.rmtree("/tmp/cats", ignore_errors=True)
+    os.mkdir("/tmp/cats")

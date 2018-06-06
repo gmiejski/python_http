@@ -1,16 +1,18 @@
 from queue import Queue, Empty
 from threading import Thread
 from timeit import default_timer as timer
+from typing import Callable
 
-from multithreading_experiment.download_site import url_get
+from multithreading_experiment.cpu_task import use_cpu
+from multithreading_experiment.download_site import url_get, prepare_directory
 
 
-def worker(queue: Queue):
+def worker(queue: Queue, ):
     def _worker():
         while True:
             try:
-                queue.get_nowait()
-                url_get()
+                func = queue.get_nowait()
+                func()
                 queue.task_done()
             except Empty:
                 break
@@ -18,28 +20,34 @@ def worker(queue: Queue):
     return _worker
 
 
-def queued_download_all_threads(count: int, max_threads=0):
-    queue = Queue(count)
+class QueueBasedExecutor:
 
-    threads_total = max_threads if max_threads != 0 else count
+    def __init__(self, max_threads=0):
+        self.max_threads = max_threads
 
-    for i in range(0, count):
-        queue.put(1)
+    def do(self, what: Callable[[], None], count: int):
+        queue = Queue(count)
+        threads_total = self.max_threads if self.max_threads != 0 else count
 
-    threads = []
-    for i in range(0, threads_total):
-        thread = Thread(target=worker(queue))
-        thread.start()
-        threads.append(thread)
+        for i in range(0, count):
+            queue.put(what)
 
-    queue.join()
+        threads = []
+        for i in range(0, threads_total):
+            thread = Thread(target=worker(queue))
+            thread.start()
+            threads.append(thread)
 
-    for t in threads:
-        t.join()
+        queue.join()
+
+        for t in threads:
+            t.join()
 
 
 if __name__ == "__main__":
+    prepare_directory()
     start = timer()
-    queued_download_all_threads(20, max_threads=0)
+    QueueBasedExecutor(max_threads=0).do(url_get, 20)
+    QueueBasedExecutor(max_threads=0).do(use_cpu(1000000), 20)
     end = timer()
     print(end - start)
