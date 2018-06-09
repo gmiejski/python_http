@@ -3,8 +3,8 @@ from threading import Thread
 from timeit import default_timer as timer
 from typing import Callable
 
-from multithreading_experiment.cpu_task import use_cpu
-from multithreading_experiment.download_site import url_get, prepare_directory
+from multithreading_experiment.cpu_gil_release import cpu_without_gil
+from multithreading_experiment.download_site import prepare_directory
 
 
 def worker(queue: Queue, ):
@@ -47,7 +47,8 @@ class QueueBasedExecutor:
 if __name__ == "__main__":
     prepare_directory()
     start = timer()
-    QueueBasedExecutor(max_threads=0).do(url_get, 20)
-    QueueBasedExecutor(max_threads=0).do(use_cpu(1000000), 20)
+    # QueueBasedExecutor(max_threads=0).do(url_get, 20)
+    # QueueBasedExecutor(max_threads=0).do(use_cpu(1000000), 20)
+    QueueBasedExecutor(max_threads=0).do(cpu_without_gil, 20)
     end = timer()
     print(end - start)

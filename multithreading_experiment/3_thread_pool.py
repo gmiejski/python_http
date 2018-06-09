@@ -2,8 +2,8 @@ from concurrent.futures import ThreadPoolExecutor, Future
 from timeit import default_timer as timer
 from typing import List, Callable
 
-from multithreading_experiment.cpu_task import use_cpu
-from multithreading_experiment.download_site import url_get, prepare_directory
+from multithreading_experiment.cpu_gil_release import cpu_without_gil
+from multithreading_experiment.download_site import prepare_directory
 
 
 class MyThreadPoolExecutor:
@@ -25,7 +25,8 @@ class MyThreadPoolExecutor:
 if __name__ == "__main__":
     prepare_directory()
     start = timer()
-    MyThreadPoolExecutor(max_threads=1).do(url_get, 20)
-    MyThreadPoolExecutor(max_threads=1).do(use_cpu(1000000), 20)
+    # MyThreadPoolExecutor(max_threads=1).do(url_get, 20)
+    # MyThreadPoolExecutor(max_threads=1).do(use_cpu(10000), 20)
+    MyThreadPoolExecutor(max_threads=8).do(cpu_without_gil, 20)
     end = timer()
-    print(end - start)
+    print("{}s".format(end - start))

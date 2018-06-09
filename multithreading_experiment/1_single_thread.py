@@ -1,7 +1,7 @@
 from timeit import default_timer as timer
 from typing import Callable
 
-from multithreading_experiment.cpu_task import use_cpu
+from multithreading_experiment.cpu_gil_release import cpu_without_gil
 from multithreading_experiment.download_site import url_get, prepare_directory
 
 
@@ -21,7 +21,8 @@ if __name__ == "__main__":
     prepare_directory()
 
     start = timer()
-    SingleThreadExecutor().do(use_cpu(1000000), 5)
-    SingleThreadExecutor().do(url_get, 5)
+    # SingleThreadExecutor().do(use_cpu(1000000), 5)
+    # SingleThreadExecutor().do(url_get, 5)
+    SingleThreadExecutor().do(cpu_without_gil, 20)
     end = timer()
     print(end - start)
